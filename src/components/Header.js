@@ -14,6 +14,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userName = useSelector(selectUserName);
+  console.log("user name outside", userName);
   const userPhoto = useSelector(selectUserPhoto);
 
   useEffect(() => {
@@ -21,6 +22,7 @@ const Header = () => {
       if (user) {
         setUser(user);
         navigate("/home");
+        console.log("user name inside", userName);
       }
     });
   }, [userName]);
