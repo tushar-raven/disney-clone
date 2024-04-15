@@ -1,9 +1,30 @@
-import React from "react";
+import { useEffect } from "react";
 import styled from "styled-components";
 import { auth, provider } from "../firebase";
 import { signInWithPopup } from "firebase/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {
+  selectUserName,
+  selectUserPhoto,
+  setUserLoginDetails,
+} from "../features/user/userSlice";
 
 const Header = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const userName = useSelector(selectUserName);
+  const userPhoto = useSelector(selectUserPhoto);
+
+  useEffect(() => {
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUser(user);
+        navigate("/home");
+      }
+    });
+  }, [userName]);
+
   const handleAuth = () => {
     provider.setCustomParameters({
       prompt: "select_account",
@@ -11,7 +32,7 @@ const Header = () => {
 
     signInWithPopup(auth, provider)
       .then((result) => {
-        console.log(result);
+        setUser(result);
       })
       .catch((error) => {
         if (error.code === "auth/cancelled-popup-request") {
@@ -19,10 +40,20 @@ const Header = () => {
         } else if (error.code === "auth/popup-closed-by-user") {
           alert("Sign-in popup was closed by the user before completion.");
         } else {
-          alert("Error occurred during sign-in:", error);
+          alert("Error occurred during sign-in:" + error.message);
           alert("An error occurred during sign-in. Please try again later.");
         }
       });
+  };
+
+  const setUser = (result) => {
+    dispatch(
+      setUserLoginDetails({
+        name: result.user.displayName,
+        email: result.user.email,
+        photo: result.user.photoURL,
+      })
+    );
   };
 
   return (
@@ -30,33 +61,40 @@ const Header = () => {
       <Logo>
         <img src="/images/logo.svg" alt="Disney+" />
       </Logo>
-      <NavMenu>
-        <a href="/home">
-          <img src="/images/home-icon.svg" alt="HOME" />
-          <span>HOME</span>
-        </a>
-        <a href="/search">
-          <img src="/images/search-icon.svg" alt="SEARCH" />
-          <span>SEARCH</span>
-        </a>
-        <a href="/watchlist">
-          <img src="/images/watchlist-icon.svg" alt="WATCHLIST" />
-          <span>WATCHLIST</span>
-        </a>
-        <a href="/original">
-          <img src="/images/original-icon.svg" alt="ORIGINAL" />
-          <span>ORIGINAL</span>
-        </a>
-        <a href="/movie">
-          <img src="/images/movie-icon.svg" alt="MOVIE" />
-          <span>MOVIE</span>
-        </a>
-        <a href="/series">
-          <img src="/images/series-icon.svg" alt="SERIES" />
-          <span>SERIES</span>
-        </a>
-      </NavMenu>
-      <Login onClick={handleAuth}>Login</Login>
+
+      {!userName ? (
+        <Login onClick={handleAuth}>Login</Login>
+      ) : (
+        <>
+          <NavMenu>
+            <a href="/home">
+              <img src="/images/home-icon.svg" alt="HOME" />
+              <span>HOME</span>
+            </a>
+            <a href="/search">
+              <img src="/images/search-icon.svg" alt="SEARCH" />
+              <span>SEARCH</span>
+            </a>
+            <a href="/watchlist">
+              <img src="/images/watchlist-icon.svg" alt="WATCHLIST" />
+              <span>WATCHLIST</span>
+            </a>
+            <a href="/original">
+              <img src="/images/original-icon.svg" alt="ORIGINAL" />
+              <span>ORIGINAL</span>
+            </a>
+            <a href="/movie">
+              <img src="/images/movie-icon.svg" alt="MOVIE" />
+              <span>MOVIE</span>
+            </a>
+            <a href="/series">
+              <img src="/images/series-icon.svg" alt="SERIES" />
+              <span>SERIES</span>
+            </a>
+          </NavMenu>
+          <UserImg src={userPhoto} alt={userName} />
+        </>
+      )}
     </Nav>
   );
 };
@@ -172,4 +210,7 @@ const Login = styled.a`
   }
 `;
 
+const UserImg = styled.img`
+  height: 100%;
+`;
 export default Header;
