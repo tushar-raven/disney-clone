@@ -20,12 +20,13 @@ const Header = () => {
   useEffect(() => {
     auth.onAuthStateChanged(async (user) => {
       if (user) {
+        console.log("in use effect", user);
         setUser(user);
         navigate("/home");
         console.log("user name inside", userName);
       }
     });
-  }, [userName]);
+  }, [userName, navigate]);
 
   const handleAuth = () => {
     provider.setCustomParameters({
@@ -34,7 +35,7 @@ const Header = () => {
 
     signInWithPopup(auth, provider)
       .then((result) => {
-        setUser(result);
+        setUser(result.user);
       })
       .catch((error) => {
         if (error.code === "auth/cancelled-popup-request") {
@@ -51,9 +52,9 @@ const Header = () => {
   const setUser = (result) => {
     dispatch(
       setUserLoginDetails({
-        name: result.user.displayName,
-        email: result.user.email,
-        photo: result.user.photoURL,
+        name: result?.displayName,
+        email: result?.email,
+        photo: result?.photoURL,
       })
     );
   };
