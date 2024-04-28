@@ -7,46 +7,59 @@ import { useNavigate } from "react-router-dom";
 import {
   selectUserName,
   selectUserPhoto,
+  setSignOutState,
   setUserLoginDetails,
 } from "../features/user/userSlice";
+import NavMenuInside from "./NavMenuInside";
 
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userName = useSelector(selectUserName);
-  console.log("user name outside", userName);
+  // console.log("user name outside", userName);
   const userPhoto = useSelector(selectUserPhoto);
 
   useEffect(() => {
     auth.onAuthStateChanged(async (user) => {
       if (user) {
-        console.log("in use effect", user);
         setUser(user);
         navigate("/home");
-        console.log("user name inside", userName);
+        // console.log("user name inside", userName);
+      } else {
+        navigate("/");
       }
     });
   }, [userName, navigate]);
 
   const handleAuth = () => {
-    provider.setCustomParameters({
-      prompt: "select_account",
-    });
+    // provider.setCustomParameters({
+    //   prompt: "select_account",
+    // });
 
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        setUser(result.user);
-      })
-      .catch((error) => {
-        if (error.code === "auth/cancelled-popup-request") {
-          alert("The sign-in popup request was cancelled by the user.");
-        } else if (error.code === "auth/popup-closed-by-user") {
-          alert("Sign-in popup was closed by the user before completion.");
-        } else {
-          alert("Error occurred during sign-in:" + error.message);
-          alert("An error occurred during sign-in. Please try again later.");
-        }
-      });
+    if (!userName) {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          setUser(result.user);
+        })
+        .catch((error) => {
+          if (error.code === "auth/cancelled-popup-request") {
+            alert("The sign-in popup request was cancelled by the user.");
+          } else if (error.code === "auth/popup-closed-by-user") {
+            alert("Sign-in popup was closed by the user before completion.");
+          } else {
+            alert("Error occurred during sign-in:" + error.message);
+            alert("An error occurred during sign-in. Please try again later.");
+          }
+        });
+    } else {
+      auth
+        .signOut()
+        .then(() => {
+          dispatch(setSignOutState());
+          navigate("/");
+        })
+        .catch((err) => alert(err.message));
+    }
   };
 
   const setUser = (result) => {
@@ -70,32 +83,17 @@ const Header = () => {
       ) : (
         <>
           <NavMenu>
-            <a href="/home">
-              <img src="/images/home-icon.svg" alt="HOME" />
-              <span>HOME</span>
-            </a>
-            <a href="/search">
-              <img src="/images/search-icon.svg" alt="SEARCH" />
-              <span>SEARCH</span>
-            </a>
-            <a href="/watchlist">
-              <img src="/images/watchlist-icon.svg" alt="WATCHLIST" />
-              <span>WATCHLIST</span>
-            </a>
-            <a href="/original">
-              <img src="/images/original-icon.svg" alt="ORIGINAL" />
-              <span>ORIGINAL</span>
-            </a>
-            <a href="/movie">
-              <img src="/images/movie-icon.svg" alt="MOVIE" />
-              <span>MOVIE</span>
-            </a>
-            <a href="/series">
-              <img src="/images/series-icon.svg" alt="SERIES" />
-              <span>SERIES</span>
-            </a>
+            <NavMenuInside />
           </NavMenu>
-          <UserImg src={userPhoto} alt={userName} />
+          <SignOut>
+            <UserImg src={userPhoto} alt={userName} />
+            <DropDown>
+              <NavMenu>
+                <NavMenuInside />
+              </NavMenu>
+              <span onClick={handleAuth}>Sign out</span>
+            </DropDown>
+          </SignOut>
         </>
       )}
     </Nav>
@@ -191,9 +189,9 @@ const NavMenu = styled.div`
     }
   }
 
-  /* @media (max-width: 768px) {
+  @media (max-width: 900px) {
     display: none;
-  } */
+  }
 `;
 
 const Login = styled.a`
@@ -215,5 +213,65 @@ const Login = styled.a`
 
 const UserImg = styled.img`
   height: 100%;
+  border-radius: 50%;
+  width: 100%;
 `;
+
+const DropDown = styled.div`
+  position: absolute;
+  top: 48px;
+  right: 0px;
+  background: rgb(19, 19, 19);
+  border: 1px solid rgba(151, 151, 151, 0.34);
+  border-radius: 4px;
+  box-shadow: rgb(0 0 0 / 50%);
+  padding: 10px;
+  font-size: 14px;
+  letter-spacing: 3px;
+  min-width: 100px;
+  width: auto;
+  opacity: 0;
+  display: none;
+
+  ${NavMenu} {
+    margin-bottom: 20px;
+
+    @media (min-width: 900px) {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 4px;
+      margin: 0 0 10px 0;
+    }
+
+    a {
+      padding: 0;
+      margin-bottom: 10px;
+    }
+  }
+`;
+
+const SignOut = styled.div`
+  position: relative;
+  height: 48px;
+  width: 48px;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    ${DropDown} {
+      opacity: 1;
+      display: block;
+      transition-duration: 1s;
+    }
+  }
+`;
+
 export default Header;
