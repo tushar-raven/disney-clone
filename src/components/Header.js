@@ -29,7 +29,7 @@ const Header = () => {
         navigate("/");
       }
     });
-  }, [userName, navigate]);
+  }, [userName]);
 
   const handleAuth = () => {
     // provider.setCustomParameters({

@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   return (
@@ -6,7 +7,6 @@ const Login = () => {
       <Content>
         <CTA>
           <CTALogoOne src="/images/cta-logo-one.svg" alt="" />
-          <SignUp>Get All There</SignUp>
           <Description>
             Get Premier Access to Raya and the Last Dragon for an additional fee
             with a Disney+ subscription. As of 03/26/21, the price of Disney+
@@ -68,24 +68,6 @@ const CTALogoOne = styled.img`
   /* min-height: 1px;
   display: block; */
   width: 100%;
-`;
-
-const SignUp = styled.a`
-  font-weight: bold;
-  color: #f9f9f9;
-  background-color: #0063e5;
-  margin-bottom: 12px;
-  width: 100%;
-  letter-spacing: 1.5px;
-  font-size: 18px;
-  padding: 16.5px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-
-  &:hover {
-    background-color: #0483ee;
-    cursor: pointer;
-  }
 `;
 
 const Description = styled.p`
