@@ -26,7 +26,6 @@ const Home = () => {
       let trending = [];
 
       snapshot.forEach((doc) => {
-        console.log(doc.data());
         switch (doc.data().type) {
           case "recommend":
             recommends = [...recommends, { id: doc.id, ...doc.data() }];
@@ -59,7 +58,7 @@ const Home = () => {
     });
 
     return () => unsubscribe();
-  }, [dispatch, userName]);
+  }, [userName]);
 
   return (
     <Container>
